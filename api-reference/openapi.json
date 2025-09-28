@@ -1,94 +1,169 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "OpenAPI Plant Store",
-    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
-    "license": {
-      "name": "MIT"
-    },
-    "version": "1.0.0"
+    "title": "GoTransit API",
+    "description": "Real-time transit information for GO Transit services in the Greater Toronto Area",
+    "version": "1.0.0",
+    "contact": {
+      "name": "GoTransit API Support"
+    }
   },
   "servers": [
     {
-      "url": "http://sandbox.mintlify.com"
-    }
-  ],
-  "security": [
-    {
-      "bearerAuth": []
+      "url": "https://your-domain.com/api",
+      "description": "Production server"
     }
   ],
   "paths": {
-    "/plants": {
+    "/next": {
       "get": {
-        "description": "Returns all plants from the system that the user has access to",
+        "summary": "Get next trips",
+        "description": "Retrieve upcoming trips between two stations",
         "parameters": [
           {
-            "name": "limit",
+            "name": "from",
             "in": "query",
-            "description": "The maximum number of results to return",
+            "description": "Origin station name",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Union Station GO"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "Destination station name",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "Ajax GO"
+            }
+          },
+          {
+            "name": "n",
+            "in": "query",
+            "description": "Number of trips to return (1-10)",
+            "required": false,
             "schema": {
               "type": "integer",
-              "format": "int32"
+              "minimum": 1,
+              "maximum": 10,
+              "default": 3,
+              "example": 5
+            }
+          },
+          {
+            "name": "when",
+            "in": "query",
+            "description": "ISO timestamp for when to search from",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2024-01-15T14:30:00-05:00"
+            }
+          },
+          {
+            "name": "tz",
+            "in": "query",
+            "description": "Timezone for the search",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "America/Toronto",
+              "example": "America/Toronto"
+            }
+          },
+          {
+            "name": "auto",
+            "in": "query",
+            "description": "Enable automatic direction detection using coordinates",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["0", "1"],
+              "default": "0",
+              "example": "1"
+            }
+          },
+          {
+            "name": "lat",
+            "in": "query",
+            "description": "Latitude for automatic direction detection (required when auto=1)",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "example": 43.6532
+            }
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "description": "Longitude for automatic direction detection (required when auto=1)",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "example": -79.3832
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Plant response",
+            "description": "Successfully retrieved upcoming trips",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Plant"
-                  }
+                  "$ref": "#/components/schemas/NextTripsResponse"
+                },
+                "example": {
+                  "origin": "Union Station GO",
+                  "destination": "Ajax GO",
+                  "generated_at": "2024-01-15T14:30:00-05:00",
+                  "trips": [
+                    {
+                      "departure_local": "14:45",
+                      "arrival_local": "15:23",
+                      "headsign": "Ajax GO",
+                      "route": "Lakeshore East",
+                      "trip_id": "12345",
+                      "service_id": "weekday",
+                      "notes": ["scheduled"]
+                    }
+                  ],
+                  "attribution": "Data used with permission of Metrolinx."
                 }
               }
             }
           },
           "400": {
-            "description": "Unexpected error",
+            "description": "Bad request - missing required parameters",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "description": "Creates a new plant in the store",
-        "requestBody": {
-          "description": "Plant to add to the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPlant"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "plant response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Plant"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
           },
-          "400": {
-            "description": "unexpected error",
+          "404": {
+            "description": "Station not found",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -96,57 +171,116 @@
         }
       }
     },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
+    "/route": {
+      "get": {
+        "summary": "Get route information",
+        "description": "Retrieve all stations on a specific route",
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
-            "description": "ID of plant to delete",
+            "name": "route",
+            "in": "query",
+            "description": "Route name or identifier",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "example": "Lakeshore East"
             }
           }
         ],
         "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
-          },
-          "400": {
-            "description": "unexpected error",
+          "200": {
+            "description": "Successfully retrieved route information",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/RouteResponse"
+                },
+                "example": {
+                  "route": "Lakeshore East",
+                  "stations": [
+                    {
+                      "stop_id": "12345",
+                      "stop_name": "Union Station GO",
+                      "stop_sequence": 1,
+                      "direction": "Ajax GO"
+                    }
+                  ],
+                  "count": 15,
+                  "attribution": "Data used with permission of Metrolinx."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing route parameter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Route not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
           }
         }
       }
-    }
-  },
-  "webhooks": {
-    "/plant/webhook": {
-      "post": {
-        "description": "Information about a new plant added to the store",
-        "requestBody": {
-          "description": "Plant added to the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPlant"
-              }
-            }
-          }
-        },
+    },
+    "/routes": {
+      "get": {
+        "summary": "Get all routes",
+        "description": "Retrieve all available GO Transit routes",
         "responses": {
           "200": {
-            "description": "Return a 200 status to indicate that the data was received successfully"
+            "description": "Successfully retrieved all routes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoutesResponse"
+                },
+                "example": {
+                  "routes": [
+                    {
+                      "route_id": "LSE",
+                      "route_short_name": "LSE",
+                      "route_long_name": "Lakeshore East",
+                      "route_type": "2",
+                      "station_count": 15
+                    }
+                  ],
+                  "count": 7,
+                  "attribution": "Data used with permission of Metrolinx."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -154,63 +288,195 @@
   },
   "components": {
     "schemas": {
-      "Plant": {
-        "required": [
-          "name"
-        ],
+      "Trip": {
         "type": "object",
         "properties": {
-          "name": {
-            "description": "The name of the plant",
-            "type": "string"
+          "departure_local": {
+            "type": "string",
+            "description": "Local departure time in HH:mm format",
+            "example": "14:45"
           },
-          "tag": {
-            "description": "Tag to specify the type",
-            "type": "string"
+          "arrival_local": {
+            "type": "string",
+            "description": "Local arrival time in HH:mm format",
+            "example": "15:23"
+          },
+          "headsign": {
+            "type": "string",
+            "description": "Trip destination or headsign",
+            "example": "Ajax GO"
+          },
+          "route": {
+            "type": "string",
+            "description": "Route name",
+            "example": "Lakeshore East"
+          },
+          "trip_id": {
+            "type": "string",
+            "description": "Unique trip identifier",
+            "example": "12345"
+          },
+          "service_id": {
+            "type": "string",
+            "description": "Service pattern identifier",
+            "example": "weekday"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Additional trip notes",
+            "example": ["scheduled"]
           }
         }
       },
-      "NewPlant": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
+      "NextTripsResponse": {
+        "type": "object",
+        "properties": {
+          "origin": {
+            "type": "string",
+            "description": "Origin station name",
+            "example": "Union Station GO"
           },
-          {
-            "required": [
-              "id"
-            ],
-            "type": "object",
-            "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
-              }
-            }
+          "destination": {
+            "type": "string",
+            "description": "Destination station name",
+            "example": "Ajax GO"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the response was generated",
+            "example": "2024-01-15T14:30:00-05:00"
+          },
+          "trips": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Trip"
+            },
+            "description": "List of upcoming trips"
+          },
+          "attribution": {
+            "type": "string",
+            "description": "Data attribution notice",
+            "example": "Data used with permission of Metrolinx."
           }
-        ]
+        }
       },
-      "Error": {
-        "required": [
-          "error",
-          "message"
-        ],
+      "Station": {
+        "type": "object",
+        "properties": {
+          "stop_id": {
+            "type": "string",
+            "description": "Unique stop identifier",
+            "example": "12345"
+          },
+          "stop_name": {
+            "type": "string",
+            "description": "Station name",
+            "example": "Union Station GO"
+          },
+          "stop_sequence": {
+            "type": "integer",
+            "description": "Position of station on the route",
+            "example": 1
+          },
+          "direction": {
+            "type": "string",
+            "description": "Direction of travel",
+            "example": "Ajax GO"
+          }
+        }
+      },
+      "RouteResponse": {
+        "type": "object",
+        "properties": {
+          "route": {
+            "type": "string",
+            "description": "Route name",
+            "example": "Lakeshore East"
+          },
+          "stations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Station"
+            },
+            "description": "List of stations on the route"
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of stations on the route",
+            "example": 15
+          },
+          "attribution": {
+            "type": "string",
+            "description": "Data attribution notice",
+            "example": "Data used with permission of Metrolinx."
+          }
+        }
+      },
+      "RouteInfo": {
+        "type": "object",
+        "properties": {
+          "route_id": {
+            "type": "string",
+            "description": "Unique route identifier",
+            "example": "LSE"
+          },
+          "route_short_name": {
+            "type": "string",
+            "description": "Short route name",
+            "example": "LSE"
+          },
+          "route_long_name": {
+            "type": "string",
+            "description": "Full route name",
+            "example": "Lakeshore East"
+          },
+          "route_type": {
+            "type": "string",
+            "description": "Type of transit service",
+            "example": "2"
+          },
+          "station_count": {
+            "type": "integer",
+            "description": "Number of stations on the route",
+            "example": 15
+          }
+        }
+      },
+      "RoutesResponse": {
+        "type": "object",
+        "properties": {
+          "routes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RouteInfo"
+            },
+            "description": "List of all available routes"
+          },
+          "count": {
+            "type": "integer",
+            "description": "Total number of routes",
+            "example": 7
+          },
+          "attribution": {
+            "type": "string",
+            "description": "Data attribution notice",
+            "example": "Data used with permission of Metrolinx."
+          }
+        }
+      },
+      "ErrorResponse": {
         "type": "object",
         "properties": {
           "error": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "message": {
-            "type": "string"
+            "type": "string",
+            "description": "Error message",
+            "example": "Provide from & to, or use auto=1&lat=&lon="
           }
         }
-      }
-    },
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer"
       }
     }
   }

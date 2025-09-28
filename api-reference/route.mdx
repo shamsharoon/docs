@@ -1,0 +1,199 @@
+---
+title: 'Get Route Information'
+openapi: 'GET /route'
+---
+
+## Overview
+
+Retrieve all stations on a specific GO Transit route. This endpoint provides detailed information about a route including all station stops, their sequences, and direction information.
+
+## Parameters
+
+<ParamField query="route" type="string" required>
+  Route name or identifier. Can be the full route name or a partial match.
+  
+  Examples: `Lakeshore East`, `Kitchener`, `LSE`, `Kit`
+</ParamField>
+
+## Response Fields
+
+<ResponseField name="route" type="string">
+  The route name as provided in the request.
+</ResponseField>
+
+<ResponseField name="stations" type="array">
+  Array of stations on the route with the following structure:
+  
+  <Expandable title="Station Object">
+    <ResponseField name="stop_id" type="string">
+      Unique stop identifier from GTFS data.
+    </ResponseField>
+    
+    <ResponseField name="stop_name" type="string">
+      Full station name.
+    </ResponseField>
+    
+    <ResponseField name="stop_sequence" type="integer">
+      Position of the station on the route (1-based).
+    </ResponseField>
+    
+    <ResponseField name="direction" type="string">
+      Direction of travel for this station sequence.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="count" type="integer">
+  Total number of stations on the route.
+</ResponseField>
+
+<ResponseField name="attribution" type="string">
+  Data attribution notice from Metrolinx.
+</ResponseField>
+
+## Examples
+
+### Get Lakeshore East Stations
+
+<RequestExample>
+```bash cURL
+curl "https://your-domain.com/api/route?route=Lakeshore East"
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "route": "Lakeshore East",
+  "stations": [
+    {
+      "stop_id": "12345",
+      "stop_name": "Union Station GO",
+      "stop_sequence": 1,
+      "direction": "Ajax GO"
+    },
+    {
+      "stop_id": "12346",
+      "stop_name": "Danforth GO",
+      "stop_sequence": 2,
+      "direction": "Ajax GO"
+    },
+    {
+      "stop_id": "12347",
+      "stop_name": "Scarborough GO",
+      "stop_sequence": 3,
+      "direction": "Ajax GO"
+    },
+    {
+      "stop_id": "12348",
+      "stop_name": "Eglinton GO",
+      "stop_sequence": 4,
+      "direction": "Ajax GO"
+    },
+    {
+      "stop_id": "12349",
+      "stop_name": "Guildwood GO",
+      "stop_sequence": 5,
+      "direction": "Ajax GO"
+    },
+    {
+      "stop_id": "12350",
+      "stop_name": "Rouge Hill GO",
+      "stop_sequence": 6,
+      "direction": "Ajax GO"
+    },
+    {
+      "stop_id": "12351",
+      "stop_name": "Pickering GO",
+      "stop_sequence": 7,
+      "direction": "Ajax GO"
+    },
+    {
+      "stop_id": "12352",
+      "stop_name": "Ajax GO",
+      "stop_sequence": 8,
+      "direction": "Ajax GO"
+    }
+  ],
+  "count": 8,
+  "attribution": "Data used with permission of Metrolinx."
+}
+```
+</ResponseExample>
+
+### Partial Route Name Match
+
+<RequestExample>
+```bash cURL
+curl "https://your-domain.com/api/route?route=LSE"
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "route": "LSE",
+  "stations": [
+    {
+      "stop_id": "12345",
+      "stop_name": "Union Station GO",
+      "stop_sequence": 1,
+      "direction": "Ajax GO"
+    }
+    // ... additional stations
+  ],
+  "count": 8,
+  "attribution": "Data used with permission of Metrolinx."
+}
+```
+</ResponseExample>
+
+## Error Responses
+
+### Missing Route Parameter
+
+<ResponseExample>
+```json 400 Bad Request
+{
+  "error": "Provide route parameter"
+}
+```
+</ResponseExample>
+
+### Route Not Found
+
+<ResponseExample>
+```json 404 Not Found
+{
+  "error": "Route not found or no stations available"
+}
+```
+</ResponseExample>
+
+## Use Cases
+
+### Building Station Lists
+
+Use this endpoint to populate dropdown menus or station selection interfaces in your applications.
+
+### Route Planning
+
+Combine with the `/next` endpoint to help users select valid origin and destination stations.
+
+### Station Discovery
+
+Help users discover all available stations on a particular route they're interested in.
+
+## Tips
+
+<Tip>
+Route names are case-insensitive and support partial matching. You can use short codes like "LSE" or full names like "Lakeshore East".
+</Tip>
+
+<Tip>
+The `stop_sequence` field shows the order of stations along the route, which can be useful for visualizing route paths.
+</Tip>
+
+<Tip>
+Use this endpoint in combination with `/routes` to first discover available routes, then get their station details.
+</Tip>

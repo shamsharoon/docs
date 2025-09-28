@@ -1,97 +1,52 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: 'Welcome to GoTransit API'
+description: 'Real-time transit information for GO Transit services in the Greater Toronto Area'
 ---
 
-## Setting up
+<img
+  style={{ borderRadius: '0.5rem' }}
+  src="/images/hero-light.png"
+  alt="GoTransit API - Real-time transit information"
+/>
 
-Get your documentation site up and running in minutes.
+## Get Started
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
+The GoTransit API provides real-time transit information for GO Transit services across the Greater Toronto Area. Access schedule data, route information, and trip planning capabilities through our RESTful API.
+
+<CardGroup cols={2}>
+<Card title="Quick Start" icon="rocket" href="/quickstart">
+  Get up and running with your first API call in minutes
 </Card>
 
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
-  </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
-  </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
-  </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
-  </Card>
-</Columns>
-
-## Create beautiful pages
-
-Everything you need to create world-class documentation.
-
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
-
-## Need inspiration?
-
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
+<Card title="API Reference" icon="code" href="/api-reference/introduction">
+  Explore all available endpoints and data structures
 </Card>
+</CardGroup>
+
+## Key Features
+
+- **Real-time Trip Information**: Get upcoming trips between any two GO Transit stations
+- **Route Discovery**: Explore all available routes and their station stops
+- **Automatic Direction Detection**: Use GPS coordinates to automatically determine travel direction
+- **Flexible Time Queries**: Search for trips at specific times or use current time
+- **Multiple Timezone Support**: Work with different timezones as needed
+
+## Data Source
+
+All transit data is sourced from Metrolinx's official GTFS (General Transit Feed Specification) feed and is updated regularly to ensure accuracy.
+
+<Note>
+Data used with permission of Metrolinx.
+</Note>
+
+## Getting Help
+
+<CardGroup cols={2}>
+<Card title="API Documentation" icon="book-open" href="/api-reference/introduction">
+  Comprehensive API reference with examples
+</Card>
+
+<Card title="Quick Start Guide" icon="play" href="/quickstart">
+  Step-by-step guide to make your first API call
+</Card>
+</CardGroup>

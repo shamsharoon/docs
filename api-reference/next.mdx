@@ -1,0 +1,212 @@
+---
+title: 'Get Next Trips'
+openapi: 'GET /next'
+---
+
+## Overview
+
+Retrieve upcoming trips between two GO Transit stations. This endpoint provides real-time trip information including departure and arrival times, route details, and service information.
+
+## Parameters
+
+<ParamField query="from" type="string" required>
+  Origin station name. Use the full station name as it appears in the GTFS data.
+  
+  Example: `Union Station GO`, `Ajax GO`, `Oshawa GO`
+</ParamField>
+
+<ParamField query="to" type="string" required>
+  Destination station name. Use the full station name as it appears in the GTFS data.
+  
+  Example: `Union Station GO`, `Ajax GO`, `Oshawa GO`
+</ParamField>
+
+<ParamField query="n" type="integer" default="3">
+  Number of trips to return. Must be between 1 and 10.
+  
+  Default: 3
+</ParamField>
+
+<ParamField query="when" type="string">
+  ISO timestamp for when to search from. If not provided, uses current time.
+  
+  Example: `2024-01-15T14:30:00-05:00`
+</ParamField>
+
+<ParamField query="tz" type="string" default="America/Toronto">
+  Timezone for the search. Uses IANA timezone format.
+  
+  Default: `America/Toronto`
+</ParamField>
+
+<ParamField query="auto" type="string">
+  Enable automatic direction detection using coordinates. Set to `1` to enable.
+  
+  When enabled, requires `lat` and `lon` parameters and ignores `from` and `to`.
+</ParamField>
+
+<ParamField query="lat" type="number">
+  Latitude for automatic direction detection. Required when `auto=1`.
+  
+  Example: `43.6532`
+</ParamField>
+
+<ParamField query="lon" type="number">
+  Longitude for automatic direction detection. Required when `auto=1`.
+  
+  Example: `-79.3832`
+</ParamField>
+
+## Response Fields
+
+<ResponseField name="origin" type="string">
+  The origin station name as provided in the request.
+</ResponseField>
+
+<ResponseField name="destination" type="string">
+  The destination station name as provided in the request.
+</ResponseField>
+
+<ResponseField name="generated_at" type="string">
+  ISO timestamp when the response was generated.
+</ResponseField>
+
+<ResponseField name="trips" type="array">
+  Array of upcoming trips with the following structure:
+  
+  <Expandable title="Trip Object">
+    <ResponseField name="departure_local" type="string">
+      Local departure time in HH:mm format.
+    </ResponseField>
+    
+    <ResponseField name="arrival_local" type="string">
+      Local arrival time in HH:mm format.
+    </ResponseField>
+    
+    <ResponseField name="headsign" type="string">
+      Trip destination or headsign displayed on the train.
+    </ResponseField>
+    
+    <ResponseField name="route" type="string">
+      Route name (e.g., "Lakeshore East", "Kitchener").
+    </ResponseField>
+    
+    <ResponseField name="trip_id" type="string">
+      Unique trip identifier from GTFS data.
+    </ResponseField>
+    
+    <ResponseField name="service_id" type="string">
+      Service pattern identifier (e.g., "weekday", "weekend").
+    </ResponseField>
+    
+    <ResponseField name="notes" type="array">
+      Additional trip notes or status information.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="attribution" type="string">
+  Data attribution notice from Metrolinx.
+</ResponseField>
+
+## Examples
+
+### Basic Trip Query
+
+<RequestExample>
+```bash cURL
+curl "https://your-domain.com/api/next?from=Union Station GO&to=Ajax GO&n=3"
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "origin": "Union Station GO",
+  "destination": "Ajax GO",
+  "generated_at": "2024-01-15T14:30:00-05:00",
+  "trips": [
+    {
+      "departure_local": "14:45",
+      "arrival_local": "15:23",
+      "headsign": "Ajax GO",
+      "route": "Lakeshore East",
+      "trip_id": "12345",
+      "service_id": "weekday",
+      "notes": ["scheduled"]
+    },
+    {
+      "departure_local": "15:15",
+      "arrival_local": "15:53",
+      "headsign": "Ajax GO",
+      "route": "Lakeshore East",
+      "trip_id": "12346",
+      "service_id": "weekday",
+      "notes": ["scheduled"]
+    },
+    {
+      "departure_local": "15:45",
+      "arrival_local": "16:23",
+      "headsign": "Ajax GO",
+      "route": "Lakeshore East",
+      "trip_id": "12347",
+      "service_id": "weekday",
+      "notes": ["scheduled"]
+    }
+  ],
+  "attribution": "Data used with permission of Metrolinx."
+}
+```
+</ResponseExample>
+
+### Time-Specific Query
+
+<RequestExample>
+```bash cURL
+curl "https://your-domain.com/api/next?from=Union Station GO&to=Oshawa GO&when=2024-01-15T18:00:00-05:00&n=5"
+```
+</RequestExample>
+
+### Automatic Direction Detection
+
+<RequestExample>
+```bash cURL
+curl "https://your-domain.com/api/next?auto=1&lat=43.6532&lon=-79.3832&n=3"
+```
+</RequestExample>
+
+## Error Responses
+
+### Missing Parameters
+
+<ResponseExample>
+```json 400 Bad Request
+{
+  "error": "Provide from & to, or use auto=1&lat=&lon="
+}
+```
+</ResponseExample>
+
+### Station Not Found
+
+<ResponseExample>
+```json 404 Not Found
+{
+  "error": "Could not resolve stations from GTFS"
+}
+```
+</ResponseExample>
+
+## Tips
+
+<Tip>
+Station names are case-sensitive and should match the exact format in the GTFS data. Use the `/routes` endpoint to find correct station names.
+</Tip>
+
+<Tip>
+The `auto` parameter is useful for mobile applications where you have GPS coordinates and want to automatically determine the best direction.
+</Tip>
+
+<Tip>
+All times are returned in the local timezone specified by the `tz` parameter, defaulting to America/Toronto.
+</Tip>

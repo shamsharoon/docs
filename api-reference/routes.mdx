@@ -1,0 +1,203 @@
+---
+title: 'Get All Routes'
+openapi: 'GET /routes'
+---
+
+## Overview
+
+Retrieve all available GO Transit routes with their basic information. This endpoint provides a comprehensive list of all rail routes in the GO Transit system.
+
+## Parameters
+
+This endpoint does not require any parameters.
+
+## Response Fields
+
+<ResponseField name="routes" type="array">
+  Array of all available routes with the following structure:
+  
+  <Expandable title="Route Object">
+    <ResponseField name="route_id" type="string">
+      Unique route identifier from GTFS data.
+    </ResponseField>
+    
+    <ResponseField name="route_short_name" type="string">
+      Short route code or abbreviation.
+    </ResponseField>
+    
+    <ResponseField name="route_long_name" type="string">
+      Full descriptive name of the route.
+    </ResponseField>
+    
+    <ResponseField name="route_type" type="string">
+      Type of transit service (typically "2" for rail).
+    </ResponseField>
+    
+    <ResponseField name="station_count" type="integer">
+      Number of stations on this route.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="count" type="integer">
+  Total number of routes available.
+</ResponseField>
+
+<ResponseField name="attribution" type="string">
+  Data attribution notice from Metrolinx.
+</ResponseField>
+
+## Examples
+
+### Get All Routes
+
+<RequestExample>
+```bash cURL
+curl "https://your-domain.com/api/routes"
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "routes": [
+    {
+      "route_id": "LSE",
+      "route_short_name": "LSE",
+      "route_long_name": "Lakeshore East",
+      "route_type": "2",
+      "station_count": 8
+    },
+    {
+      "route_id": "LSW",
+      "route_short_name": "LSW",
+      "route_long_name": "Lakeshore West",
+      "route_type": "2",
+      "station_count": 12
+    },
+    {
+      "route_id": "KIT",
+      "route_short_name": "KIT",
+      "route_long_name": "Kitchener",
+      "route_type": "2",
+      "station_count": 15
+    },
+    {
+      "route_id": "BAR",
+      "route_short_name": "BAR",
+      "route_long_name": "Barrie",
+      "route_type": "2",
+      "station_count": 10
+    },
+    {
+      "route_id": "STO",
+      "route_short_name": "STO",
+      "route_long_name": "Stouffville",
+      "route_type": "2",
+      "station_count": 7
+    },
+    {
+      "route_id": "RHM",
+      "route_short_name": "RHM",
+      "route_long_name": "Richmond Hill",
+      "route_type": "2",
+      "station_count": 6
+    },
+    {
+      "route_id": "MIL",
+      "route_short_name": "MIL",
+      "route_long_name": "Milton",
+      "route_type": "2",
+      "station_count": 8
+    }
+  ],
+  "count": 7,
+  "attribution": "Data used with permission of Metrolinx."
+}
+```
+</ResponseExample>
+
+## Error Responses
+
+### Internal Server Error
+
+<ResponseExample>
+```json 500 Internal Server Error
+{
+  "error": "Internal error"
+}
+```
+</ResponseExample>
+
+## Use Cases
+
+### Route Discovery
+
+Use this endpoint to build route selection interfaces in your applications.
+
+### Application Initialization
+
+Load all available routes when your application starts to populate navigation menus or route filters.
+
+### Route Comparison
+
+Compare different routes by their station counts and service characteristics.
+
+### Data Validation
+
+Use route IDs and names from this endpoint to validate user inputs in other API calls.
+
+## Integration Examples
+
+### Building a Route Selector
+
+```javascript
+// Fetch all routes for a dropdown menu
+const response = await fetch('https://your-domain.com/api/routes');
+const data = await response.json();
+
+// Populate route selector
+const routeSelector = document.getElementById('route-select');
+data.routes.forEach(route => {
+  const option = document.createElement('option');
+  option.value = route.route_long_name;
+  option.textContent = `${route.route_long_name} (${route.station_count} stations)`;
+  routeSelector.appendChild(option);
+});
+```
+
+### Route Information Display
+
+```javascript
+// Display route summary
+function displayRouteSummary(route) {
+  return `
+    <div class="route-card">
+      <h3>${route.route_long_name}</h3>
+      <p>Route Code: ${route.route_short_name}</p>
+      <p>Stations: ${route.station_count}</p>
+      <button onclick="getRouteStations('${route.route_long_name}')">
+        View Stations
+      </button>
+    </div>
+  `;
+}
+```
+
+## Tips
+
+<Tip>
+Routes are sorted alphabetically by their long names for consistent ordering.
+</Tip>
+
+<Tip>
+All routes returned are rail services (route_type: "2"). Bus routes are not included in this API.
+</Tip>
+
+<Tip>
+Use the `station_count` field to show users how many stops are on each route before they dive into details.
+</Tip>
+
+<Tip>
+The `route_short_name` can be used as a more compact identifier in your application's UI.
+</Tip>

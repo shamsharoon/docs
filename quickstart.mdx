@@ -1,80 +1,133 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: 'Quick Start'
+description: 'Get up and running with the GoTransit API in minutes'
 ---
 
-## Get started in three steps
+<Info>
+**Prerequisites**:
+- Basic understanding of HTTP requests
+- Access to a terminal or API client (like Postman or curl)
+</Info>
 
-Get your documentation site running locally and make your first customization.
+Follow these steps to make your first API call and start building with the GoTransit API.
 
-### Step 1: Set up your local environment
+<Steps>
+<Step title="Make your first API call">
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+Get all available GO Transit routes:
 
-### Step 2: Deploy your changes
+```bash
+curl "https://your-domain.com/api/routes"
+```
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+<Check>
+You should receive a JSON response with a list of all available routes and their details.
+</Check>
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+</Step>
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+<Step title="Find stations on a route">
 
-### Step 3: Go live
+Get all stations for the Lakeshore East route:
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+```bash
+curl "https://your-domain.com/api/route?route=Lakeshore East"
+```
 
-## Next steps
+<Check>
+The response will include all stations on the Lakeshore East route with their stop IDs and sequences.
+</Check>
 
-Now that you have your docs running, explore these key features:
+</Step>
+
+<Step title="Get upcoming trips">
+
+Find the next 3 trips from Union Station to Ajax:
+
+```bash
+curl "https://your-domain.com/api/next?from=Union Station GO&to=Ajax GO&n=3"
+```
+
+<Check>
+You'll receive upcoming trip information including departure times, arrival times, and route details.
+</Check>
+
+</Step>
+
+<Step title="Use automatic direction detection">
+
+If you have GPS coordinates, you can automatically determine the best direction:
+
+```bash
+curl "https://your-domain.com/api/next?auto=1&lat=43.6532&lon=-79.3832&n=3"
+```
+
+<Check>
+The API will automatically choose between Union Station and Ajax based on your location.
+</Check>
+
+</Step>
+</Steps>
+
+## Common Use Cases
+
+### Basic Trip Planning
+
+```bash
+# Get next 5 trips from Union to Oshawa
+curl "https://your-domain.com/api/next?from=Union Station GO&to=Oshawa GO&n=5"
+```
+
+### Time-specific Search
+
+```bash
+# Find trips departing after 6:00 PM today
+curl "https://your-domain.com/api/next?from=Union Station GO&to=Ajax GO&when=2024-01-15T18:00:00-05:00"
+```
+
+### Route Exploration
+
+```bash
+# See all stations on the Kitchener line
+curl "https://your-domain.com/api/route?route=Kitchener"
+```
+
+## Response Format
+
+All API responses follow a consistent JSON structure:
+
+```json
+{
+  "origin": "Union Station GO",
+  "destination": "Ajax GO",
+  "generated_at": "2024-01-15T14:30:00-05:00",
+  "trips": [
+    {
+      "departure_local": "14:45",
+      "arrival_local": "15:23",
+      "headsign": "Ajax GO",
+      "route": "Lakeshore East",
+      "trip_id": "12345",
+      "service_id": "weekday",
+      "notes": ["scheduled"]
+    }
+  ],
+  "attribution": "Data used with permission of Metrolinx."
+}
+```
+
+## Next Steps
 
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
+<Card title="Explore API Reference" icon="code" href="/api-reference/introduction">
+  Learn about all available endpoints and parameters
 </Card>
 
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
+<Card title="View Example Responses" icon="eye" href="/api-reference/next">
+  See detailed examples for each endpoint
 </Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
 </CardGroup>
 
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>
+<Tip>
+All API endpoints support both query parameters and custom headers (prefixed with `x-`) for the same functionality. This allows for flexible integration patterns.
+</Tip>

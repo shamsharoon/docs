@@ -1,33 +1,82 @@
 ---
 title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+description: 'Overview of the GoTransit API endpoints and authentication'
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+## Base URL
 
-## Welcome
+All API endpoints are available at:
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
-
-<Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
->
-  View the OpenAPI specification file
-</Card>
+```
+https://your-domain.com/api
+```
 
 ## Authentication
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+Currently, the GoTransit API does not require authentication. All endpoints are publicly accessible.
+
+<Note>
+Rate limiting may be implemented in the future. We recommend implementing reasonable request throttling in your applications.
+</Note>
+
+## Available Endpoints
+
+<CardGroup cols={3}>
+<Card title="/next" icon="clock" href="/api-reference/next">
+  Get upcoming trips between two stations
+</Card>
+
+<Card title="/route" icon="route" href="/api-reference/route">
+  Get all stations on a specific route
+</Card>
+
+<Card title="/routes" icon="list" href="/api-reference/routes">
+  Get all available routes
+</Card>
+</CardGroup>
+
+## Response Format
+
+All successful responses return JSON with the following structure:
+
+- **Success responses**: HTTP 200 with JSON data
+- **Error responses**: HTTP 4xx/5xx with error message in JSON format
+
+### Error Response Format
 
 ```json
-"security": [
-  {
-    "bearerAuth": []
-  }
-]
+{
+  "error": "Error message describing what went wrong"
+}
 ```
+
+## Common HTTP Status Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 200 | Success - Request completed successfully |
+| 400 | Bad Request - Missing or invalid parameters |
+| 404 | Not Found - Station or route not found |
+| 500 | Internal Server Error - Server-side error |
+
+## Data Attribution
+
+<Warning>
+All data is used with permission of Metrolinx. Please ensure you include the attribution notice in your applications.
+</Warning>
+
+## Getting Started
+
+<Steps>
+<Step title="Explore the endpoints">
+  Start with the `/routes` endpoint to see all available routes.
+</Step>
+
+<Step title="Find stations">
+  Use `/route` to get stations for a specific route.
+</Step>
+
+<Step title="Plan trips">
+  Use `/next` to find upcoming trips between stations.
+</Step>
+</Steps>
